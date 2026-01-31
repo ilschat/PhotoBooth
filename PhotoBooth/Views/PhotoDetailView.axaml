@@ -9,9 +9,12 @@
     <conv:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter"/>
   </UserControl.Resources>
 
-  <Grid Background="#000">
+  <Grid Background="#000" 
+        PointerPressed="OnBackgroundPressed">
     <Image Source="{Binding SelectedPhotoDetail, Converter={StaticResource ByteArrayToBitmapConverter}}"
-           Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+           Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+           PointerPressed="OnBackgroundPressed"
+/>
     <Button Content="✕"
             VerticalContentAlignment="Center"
             HorizontalContentAlignment="Center"
