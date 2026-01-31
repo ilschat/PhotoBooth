@@ -1,0 +1,56 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:PhotoBooth.ViewModels"
+             xmlns:conv="clr-namespace:PhotoBooth.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="PhotoBooth.Views.PhotoGalleryView"
+             x:DataType="vm:PhotoGalleryViewModel">
+  
+  <UserControl.Resources>
+    <conv:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter"/>
+  </UserControl.Resources>
+  
+  <Grid Background="#111">
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Photos}" Margin="80,80,20,20">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Width="150" Height="150" 
+                    CornerRadius="10" 
+                    Background="#333" 
+                    Margin="5"
+                    Cursor="Hand"
+                    PointerPressed="OnPhotoPressed"
+                    Tag="{Binding}">
+              <Image Source="{Binding ., Converter={StaticResource ByteArrayToBitmapConverter}}"
+                     Stretch="UniformToFill"/>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+    
+    <Button Content="✕" 
+            Width="80" Height="80" 
+            FontSize="40"
+            FontWeight="Bold"
+            HorizontalAlignment="Right" 
+            VerticalAlignment="Top"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
+
+            Margin="20"
+            Background="#333"
+            Foreground="White"
+            CornerRadius="40"
+            Command="{Binding CloseGalleryCommand}" />
+  </Grid>
+</UserControl>

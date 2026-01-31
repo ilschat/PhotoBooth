@@ -1,0 +1,29 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:PhotoBooth.ViewModels"
+             xmlns:conv="clr-namespace:PhotoBooth.Converters"
+             x:Class="PhotoBooth.Views.PhotoDetailView"
+             x:DataType="vm:MainViewModel">
+
+  <UserControl.Resources>
+    <conv:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter"/>
+  </UserControl.Resources>
+
+  <Grid Background="#000">
+    <Image Source="{Binding SelectedPhotoDetail, Converter={StaticResource ByteArrayToBitmapConverter}}"
+           Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Button Content="✕"
+            VerticalContentAlignment="Center"
+            HorizontalContentAlignment="Center"
+            Width="80" Height="80" 
+            FontSize="40"
+            FontWeight="Bold"
+            HorizontalAlignment="Right" 
+            VerticalAlignment="Top"
+            Command="{Binding ClosePhotoDetailCommand}" 
+            Background="#333"
+            Foreground="White"
+            CornerRadius="40"
+            Margin="20"/>
+  </Grid>
+</UserControl>
