@@ -1,50 +1,116 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:PhotoBooth.ViewModels"
-             xmlns:conv="clr-namespace:PhotoBooth.Converters;assembly=PhotoBooth"
-             mc:Ignorable="d"
-             x:Class="PhotoBooth.Views.MainView"
-             x:DataType="vm:MainViewModel">
-
-  <UserControl.Resources>
-    <conv:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter"/>
-  </UserControl.Resources>
-
-  <Grid Margin="20">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*" />
-      <!-- Preview -->
-      <RowDefinition Height="Auto" />
-      <!-- Controls -->
-    </Grid.RowDefinitions>
-
-    <!-- Camera Preview mit Fotoalbum Overlay -->
-    <Grid Grid.Row="0">
-      <Border CornerRadius="20" Background="#222" Padding="10">
-        <Image Source="{Binding PreviewImage, Converter={StaticResource ByteArrayToBitmapConverter}}"
-               Stretch="Uniform"/>
-      </Border>
-
-      <!-- Fotoalbum Thumbnail -->
-      <Border Width="100" Height="100" CornerRadius="10"
-              Background="#333" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-              Margin="10" Cursor="Hand">
-        <Image Source="{Binding LastCapturedPhoto, Converter={StaticResource ByteArrayToBitmapConverter}}"
-               Stretch="UniformToFill"/>
-      </Border>
-    </Grid>
-
-    <!-- Timer + Foto Button -->
-    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
-      <Button Content="−" Width="60" Height="60" FontSize="24" Command="{Binding DecreaseTimerCommand}" />
-      <TextBlock Text="{Binding TimerSeconds}" FontSize="28" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-      <Button Content="+" Width="60" Height="60" FontSize="24" Command="{Binding IncreaseTimerCommand}" />
-
-      <!-- Foto Button -->
-      <Button Content="Foto starten" Width="200" Height="60" FontSize="24" Command="{Binding StartPhotoCommand}" Margin="20,0,0,0"/>
-    </StackPanel>
-
-  </Grid>
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:PhotoBooth.ViewModels"
+			 xmlns:views="clr-namespace:PhotoBooth.Views"
+			 xmlns:conv="clr-namespace:PhotoBooth.Converters;assembly=PhotoBooth"
+			 mc:Ignorable="d"
+			 x:Class="PhotoBooth.Views.MainView"
+			 x:DataType="vm:MainViewModel">
+	<UserControl.Resources>
+		<conv:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter"/>
+	</UserControl.Resources>
+	<Grid Margin="20">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		
+		<Grid Grid.Row="0">
+			<Border CornerRadius="20" Background="#222" Padding="10">
+				<Image Source="{Binding PreviewImage, Converter={StaticResource ByteArrayToBitmapConverter}}"
+					   Stretch="Uniform"/>
+			</Border>
+			
+			<TextBlock Text="{Binding CountdownText}"
+					   FontSize="200"
+					   FontWeight="Bold"
+					   HorizontalAlignment="Center"
+					   VerticalAlignment="Center"
+					   IsVisible="{Binding IsCountdownVisible}">
+				<TextBlock.Foreground>
+					<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+						<GradientStop Color="#FFD700" Offset="0"/>
+						<GradientStop Color="#FF4500" Offset="1"/>
+					</LinearGradientBrush>
+				</TextBlock.Foreground>
+				<TextBlock.RenderTransform>
+					<ScaleTransform ScaleX="{Binding CountdownScale}" ScaleY="{Binding CountdownScale}"/>
+				</TextBlock.RenderTransform>
+			</TextBlock>
+			
+			<Border Width="120" Height="120" CornerRadius="10"
+					Background="#333"
+					HorizontalAlignment="Right"
+					VerticalAlignment="Bottom"
+					Margin="10"
+					Cursor="Hand"
+					PointerPressed="OnThumbnailPressed">
+				<Image Source="{Binding LastCapturedPhoto, Converter={StaticResource ByteArrayToBitmapConverter}}"
+					   Stretch="UniformToFill"/>
+			</Border>
+			
+			<Button Content="?"
+					Width="50"
+					Height="50"
+					FontSize="24"
+					FontWeight="Bold"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Margin="10"
+					Background="#555"
+					Foreground="White"
+					CornerRadius="25"
+					Command="{Binding AdminButtonClickCommand}"/>
+		</Grid>
+		<!-- WICHTIG: </Grid> hier schließt Grid.Row="0" -->
+		
+		<StackPanel Grid.Row="1" Orientation="Horizontal"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					Spacing="20">
+			<Button Content="−"
+					Width="80"
+					Height="80"
+					FontSize="36"
+					FontWeight="Bold"
+					Command="{Binding DecreaseTimerCommand}"/>
+			<TextBlock Text="{Binding TimerSeconds}"
+					   FontSize="40"
+					   FontWeight="Bold"
+					   VerticalAlignment="Center"
+					   HorizontalAlignment="Center"
+					   Width="60"
+					   TextAlignment="Center"/>
+			<Button Content="+"
+					Width="80"
+					Height="80"
+					FontSize="36"
+					FontWeight="Bold"
+					Command="{Binding IncreaseTimerCommand}"/>
+			<Button Content="Foto starten"
+					Width="220"
+					Height="80"
+					FontSize="28"
+					FontWeight="Bold"
+					Command="{Binding StartPhotoCommand}"
+					Margin="30,0,0,0"/>
+		</StackPanel>
+		
+		<!-- Gallery Overlay - HIER nach StackPanel! -->
+		<Border Grid.RowSpan="2"
+				Background="#DD000000"
+				IsVisible="{Binding IsGalleryVisible}">
+			<views:PhotoGalleryView DataContext="{Binding GalleryViewModel}"/>
+		</Border>
+		
+		<!-- Photo Detail Overlay -->
+		<Border Grid.RowSpan="2"
+				Background="#000000"
+				IsVisible="{Binding IsPhotoDetailVisible}">
+			<views:PhotoDetailView DataContext="{Binding}"/>
+		</Border>
+		
+	</Grid>
 </UserControl>
