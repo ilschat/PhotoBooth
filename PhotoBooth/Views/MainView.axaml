@@ -64,7 +64,6 @@
 					CornerRadius="25"
 					Command="{Binding AdminButtonClickCommand}"/>
 		</Grid>
-		<!-- WICHTIG: </Grid> hier schließt Grid.Row="0" -->
 		
 		<StackPanel Grid.Row="1" Orientation="Horizontal"
 					HorizontalAlignment="Center"
@@ -98,14 +97,12 @@
 					Margin="30,0,0,0"/>
 		</StackPanel>
 		
-		<!-- Gallery Overlay - HIER nach StackPanel! -->
 		<Border Grid.RowSpan="2"
 				Background="#DD000000"
 				IsVisible="{Binding IsGalleryVisible}">
 			<views:PhotoGalleryView DataContext="{Binding GalleryViewModel}"/>
 		</Border>
 		
-		<!-- Photo Detail Overlay -->
 		<Border Grid.RowSpan="2"
 				Background="#000000"
 				IsVisible="{Binding IsPhotoDetailVisible}">

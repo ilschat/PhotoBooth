@@ -19,7 +19,7 @@ namespace PhotoBooth.Service.CameraServices
         {
             // Pi Camera als V4L2-Gerät
             _capture = new VideoCapture(0); // 0 = /dev/video0 auf Raspberry Pi
-            _capture.Open(0);               // sicherstellen, dass sie geöffnet wird
+            _capture.Open(0);              
             if (!_capture.IsOpened())
                 throw new Exception("Failed to open Raspberry Pi camera. Check if camera is connected and accessible.");
 
