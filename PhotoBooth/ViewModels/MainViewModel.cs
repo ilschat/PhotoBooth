@@ -30,9 +30,19 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int timerSeconds = 5;
 
-    [ObservableProperty]
-    private byte[]? previewImage; // Show Imagae in UI
-
+    private byte[]? _previewImage;
+    public byte[]? PreviewImage
+    {
+        get => _previewImage;
+        set
+        {
+            if (_previewImage != value)
+            {
+                _previewImage = value;
+                OnPropertyChanged();
+            }
+        }
+    }
     [ObservableProperty]
     private byte[]? lastCapturedPhoto;
     [RelayCommand]

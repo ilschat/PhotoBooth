@@ -30,19 +30,20 @@ namespace PhotoBooth.Service.CameraServices
                 throw new Exception("Failed to open webcam. Check if camera is connected and accessible.");
 
             _cts = new CancellationTokenSource();
-
+            int fps = 30;
+            int delay = 1000 / fps;
             await Task.Run(() =>
             {
-                var frame = new Mat();
+                using var frame = new Mat();
                 while (!_cts.Token.IsCancellationRequested)
                 {
-                    if (_capture.Read(frame)) // Reads a new frame
+                    if (_capture.Read(frame))
                     {
-                        PreviewFrameReady?.Invoke(ConvertFrame(frame)); // Raise event with JPEG bytes
+                        var bytes = frame.ImEncode(".jpg");
+                        PreviewFrameReady?.Invoke(bytes);
                     }
-                    Thread.Sleep(33); // ~30 FPS; can adjust for performance
+                    Thread.Sleep(delay);
                 }
-                frame.Dispose();
             }, _cts.Token);
         }
 
