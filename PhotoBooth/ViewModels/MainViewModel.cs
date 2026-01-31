@@ -115,7 +115,7 @@ public partial class MainViewModel : ObservableObject
         var photo = await _cameraService.CapturePhotoAsync();
         PreviewImage = photo;
         LastCapturedPhoto = photo;
-
+        await AnimateThumbnailPop();
         string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "PhotoBooth");
         Directory.CreateDirectory(folder);
         string filePath = Path.Combine(folder, $"Photo_{DateTime.Now:yyyyMMdd_HHmmss}.jpg");
@@ -213,6 +213,20 @@ public partial class MainViewModel : ObservableObject
                 AllPhotos.Add(bytes);
             }
         }
+    }
+
+    private double _thumbnailScale = 1;
+    public double ThumbnailScale
+    {
+        get => _thumbnailScale;
+        set => SetProperty(ref _thumbnailScale, value);
+    }
+
+    private async Task AnimateThumbnailPop()
+    {
+        ThumbnailScale = 1.5;
+        await Task.Delay(150);
+        ThumbnailScale = 1;
     }
 
     //Maybe open admin Winow/or setting ... if "?" button was spammed 5 times.. todo 

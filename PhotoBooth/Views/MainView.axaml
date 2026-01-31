@@ -16,13 +16,13 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		
+
 		<Grid Grid.Row="0">
 			<Border CornerRadius="20" Background="#222" Padding="10">
 				<Image Source="{Binding PreviewImage, Converter={StaticResource ByteArrayToBitmapConverter}}"
 					   Stretch="Uniform"/>
 			</Border>
-			
+
 			<TextBlock Text="{Binding CountdownText}"
 					   FontSize="200"
 					   FontWeight="Bold"
@@ -39,7 +39,7 @@
 					<ScaleTransform ScaleX="{Binding CountdownScale}" ScaleY="{Binding CountdownScale}"/>
 				</TextBlock.RenderTransform>
 			</TextBlock>
-			
+
 			<Border Width="120" Height="120" CornerRadius="10"
 					Background="#333"
 					HorizontalAlignment="Right"
@@ -47,10 +47,13 @@
 					Margin="10"
 					Cursor="Hand"
 					PointerPressed="OnThumbnailPressed">
-				<Image Source="{Binding LastCapturedPhoto, Converter={StaticResource ByteArrayToBitmapConverter}}"
-					   Stretch="UniformToFill"/>
+				<Image Source="{Binding LastCapturedPhoto, Converter={StaticResource ByteArrayToBitmapConverter}}">
+					<Image.RenderTransform>
+						<ScaleTransform ScaleX="{Binding ThumbnailScale}" ScaleY="{Binding ThumbnailScale}"/>
+					</Image.RenderTransform>
+				</Image>
 			</Border>
-			
+
 			<Button Content="?"
 					Width="50"
 					Height="50"
@@ -64,7 +67,7 @@
 					CornerRadius="25"
 					Command="{Binding AdminButtonClickCommand}"/>
 		</Grid>
-		
+
 		<StackPanel Grid.Row="1" Orientation="Horizontal"
 					HorizontalAlignment="Center"
 					VerticalAlignment="Center"
@@ -96,18 +99,18 @@
 					Command="{Binding StartPhotoCommand}"
 					Margin="30,0,0,0"/>
 		</StackPanel>
-		
+
 		<Border Grid.RowSpan="2"
 				Background="#DD000000"
 				IsVisible="{Binding IsGalleryVisible}">
 			<views:PhotoGalleryView DataContext="{Binding GalleryViewModel}"/>
 		</Border>
-		
+
 		<Border Grid.RowSpan="2"
 				Background="#000000"
 				IsVisible="{Binding IsPhotoDetailVisible}">
 			<views:PhotoDetailView DataContext="{Binding}"/>
 		</Border>
-		
+
 	</Grid>
 </UserControl>
