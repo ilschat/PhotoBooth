@@ -7,11 +7,14 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <OutputType>Exe</OutputType>
+    <UseAppHost>true</UseAppHost>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Avalonia.LinuxFramebuffer" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
   </ItemGroup>
 
   <ItemGroup>
