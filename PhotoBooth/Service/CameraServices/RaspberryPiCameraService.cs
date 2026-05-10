@@ -1,74 +1,200 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenCvSharp;
 
 namespace PhotoBooth.Service.CameraServices
 {
     public class RaspberryPiCameraService : ICameraService
     {
-        private VideoCapture? _capture;                  // Video capture object
-        private CancellationTokenSource? _cts;           // Used to stop the preview loop
+        private Process? _ffmpegProcess;
+        private CancellationTokenSource? _cts;
 
-        public event Action<byte[]>? PreviewFrameReady;  // Event for each new frame
+        private byte[]? _lastFrame;
 
-        /// <summary>
-        /// Startet die Kamera und Preview-Loop (~30 FPS)
-        /// </summary>
-        public async Task StartPreviewAsync()
+        public event Action<byte[]>? PreviewFrameReady;
+
+        public Task StartPreviewAsync()
         {
-            // Pi Camera als V4L2-Gerät
-            _capture = new VideoCapture(0); // 0 = /dev/video0 auf Raspberry Pi
-            _capture.Open(0);              
-            if (!_capture.IsOpened())
-                throw new Exception("Failed to open Raspberry Pi camera. Check if camera is connected and accessible.");
+            // Bereits gestartet?
+            if (_ffmpegProcess != null &&
+                !_ffmpegProcess.HasExited)
+            {
+                return Task.CompletedTask;
+            }
 
             _cts = new CancellationTokenSource();
 
-            await Task.Run(() =>
+            _ffmpegProcess = new Process
             {
-                var frame = new Mat();
-                while (!_cts.Token.IsCancellationRequested)
+                StartInfo = new ProcessStartInfo
                 {
-                    if (_capture.Read(frame))
-                    {
-                        PreviewFrameReady?.Invoke(ConvertFrame(frame));
-                    }
-                    Thread.Sleep(33); // ~30 FPS
-                }
-                frame.Dispose();
-            }, _cts.Token);
-        }
+                    FileName = "ffmpeg",
 
-        /// <summary>
-        /// Stoppt Preview-Loop und gibt Kamera frei
-        /// </summary>
-        public Task StopPreviewAsync()
-        {
-            _cts?.Cancel();
-            _capture?.Release();
-            _capture?.Dispose();
+                    Arguments =
+                        "-fflags nobuffer " +
+                        "-f v4l2 " +
+                        "-video_size 640x480 " +
+                        "-framerate 30 " +
+                        "-i /dev/video1 " +
+                        "-vf fps=15 " +
+                        "-c:v mjpeg " +
+                        "-q:v 7 " +
+                        "-f image2pipe -",
+
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            _ffmpegProcess.Start();
+
+            // stderr lesen damit ffmpeg nicht blockiert
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    while (!_ffmpegProcess.HasExited)
+                    {
+                        var line =
+                            await _ffmpegProcess
+                                .StandardError
+                                .ReadLineAsync();
+
+                        if (line == null)
+                            break;
+
+                        Console.WriteLine(line);
+                    }
+                }
+                catch
+                {
+                }
+            });
+
+            // Frames lesen
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await ReadFramesAsync(
+                        _ffmpegProcess.StandardOutput.BaseStream,
+                        _cts.Token);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            });
+
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Einzelbildaufnahme
-        /// </summary>
-        public Task<byte[]> CapturePhotoAsync()
+        private async Task ReadFramesAsync(
+            Stream stream,
+            CancellationToken token)
         {
-            var frame = new Mat();
-            _capture?.Read(frame);
-            var bytes = ConvertFrame(frame);
-            frame.Dispose();
-            return Task.FromResult(bytes);
+            var buffer = new byte[8192];
+
+            MemoryStream? currentFrame = null;
+
+            bool insideFrame = false;
+
+            byte prevByte = 0;
+
+            while (!token.IsCancellationRequested)
+            {
+                int read = await stream.ReadAsync(
+                    buffer,
+                    0,
+                    buffer.Length,
+                    token);
+
+                if (read <= 0)
+                {
+                    await Task.Delay(1, token);
+                    continue;
+                }
+
+                for (int i = 0; i < read; i++)
+                {
+                    byte currentByte = buffer[i];
+
+                    // JPEG START
+                    if (!insideFrame &&
+                        prevByte == 0xFF &&
+                        currentByte == 0xD8)
+                    {
+                        insideFrame = true;
+
+                        currentFrame = new MemoryStream();
+
+                        currentFrame.WriteByte(0xFF);
+                        currentFrame.WriteByte(0xD8);
+                    }
+                    else if (insideFrame)
+                    {
+                        currentFrame!.WriteByte(currentByte);
+
+                        // JPEG ENDE
+                        if (prevByte == 0xFF &&
+                            currentByte == 0xD9)
+                        {
+                            var frame =
+                                currentFrame.ToArray();
+
+                            _lastFrame = frame;
+
+                            PreviewFrameReady?.Invoke(frame);
+
+                            currentFrame.Dispose();
+                            currentFrame = null;
+
+                            insideFrame = false;
+                        }
+                    }
+
+                    prevByte = currentByte;
+                }
+            }
         }
 
-        /// <summary>
-        /// Mat → JPEG Bytes
-        /// </summary>
-        private byte[] ConvertFrame(Mat frame)
+        public Task StopPreviewAsync()
         {
-            return frame.ImEncode(".jpg");
+            try
+            {
+                _cts?.Cancel();
+
+                if (_ffmpegProcess != null)
+                {
+                    if (!_ffmpegProcess.HasExited)
+                    {
+                        _ffmpegProcess.Kill(true);
+
+                        _ffmpegProcess.WaitForExit();
+                    }
+
+                    _ffmpegProcess.Dispose();
+                    _ffmpegProcess = null;
+                }
+            }
+            catch
+            {
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task<byte[]> CapturePhotoAsync()
+        {
+            if (_lastFrame == null)
+                throw new Exception(
+                    "Kein Kamerabild vorhanden.");
+
+            return Task.FromResult(_lastFrame);
         }
     }
 }

@@ -91,7 +91,7 @@
 					FontSize="36"
 					FontWeight="Bold"
 					Command="{Binding IncreaseTimerCommand}"/>
-			<Button Content="Foto starten"
+			<Button Content="Foto TEST5 starten"
 					Width="220"
 					Height="80"
 					FontSize="28"

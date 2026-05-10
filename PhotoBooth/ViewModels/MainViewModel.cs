@@ -17,6 +17,13 @@ namespace PhotoBooth.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
+
+    /// <summary>
+    /// publish: 
+    /// cd C:\Users\ilsch\source\repos\PhotoBooth
+    /// dotnet publish PhotoBooth.Desktop -r linux-arm64 -c Release --self-contained true -o./publish-pi4
+    /// scp -r./publish-pi4/. pb @photobooth.local:/home/pb/photobooth4/publish-pi4/
+    /// </summary>
     private readonly ICameraService _cameraService;
 
     public MainViewModel()
@@ -24,13 +31,17 @@ public partial class MainViewModel : ObservableObject
         //Set which Service should be taken ---- 
 
         //_cameraService = new MockCameraService(); //Mock
-        _cameraService = new WebcamCameraService();  //Webcam
-        //_cameraService = new RaspberryPiCameraService();
+        //_cameraService = new WebcamCameraService();  //Webcam
+        _cameraService = new RaspberryPiCameraService();
         //_cameraService = new DslrCameraService();
         //_cameraService = new IpCameraService();
         // Event für PreviewFrames abonnieren
         _cameraService.PreviewFrameReady += OnPreviewFrameReady;
-
+        _ = StartPreviewAsync().ContinueWith(t =>
+        {
+            if (t.IsFaulted)
+                Console.WriteLine("Camera error: " + t.Exception?.Message);
+        });
         _ = StartPreviewAsync();
     }
 
