@@ -13,6 +13,7 @@
           "Avalonia.LinuxFramebuffer": "11.1.0",
           "PhotoBooth": "1.0.0",
           "SkiaSharp.NativeAssets.Linux": "3.119.2",
+          "SkiaSharp.NativeAssets.Linux.NoDependencies": "3.119.2",
           "runtimepack.Microsoft.NETCore.App.Runtime.linux-arm64": "8.0.20"
         },
         "runtime": {
@@ -1025,6 +1026,7 @@
           }
         }
       },
+      "SkiaSharp.NativeAssets.Linux.NoDependencies/3.119.2": {},
       "SkiaSharp.NativeAssets.macOS/2.88.8": {},
       "SkiaSharp.NativeAssets.WebAssembly/2.88.8": {},
       "SkiaSharp.NativeAssets.Win32/2.88.8": {},
@@ -1283,6 +1285,13 @@
       "sha512": "sha512-9WzxSyG/s9Id506j0Ht+Bi5ucOpWKPzd1XXr9TD4fuCafHHy2swRSlbZtC3IDQAsvCH63OerkDJajj43uSv5og==",
       "path": "skiasharp.nativeassets.linux/3.119.2",
       "hashPath": "skiasharp.nativeassets.linux.3.119.2.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.Linux.NoDependencies/3.119.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1rmveKZ8Cz7k4QJQdtKV6RFXYIEqYBiX450Bm0Bk41EE50MMPUyF81cRnASsuV0qCwdZuzjZTaFvoqS0Q2zVfA==",
+      "path": "skiasharp.nativeassets.linux.nodependencies/3.119.2",
+      "hashPath": "skiasharp.nativeassets.linux.nodependencies.3.119.2.nupkg.sha512"
     },
     "SkiaSharp.NativeAssets.macOS/2.88.8": {
       "type": "package",
